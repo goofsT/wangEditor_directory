@@ -1,89 +1,120 @@
-# wangeditor-dir-vue3
+# wangeditor-directory-vue3
+
+一个基于Vue 3的wangEditor目录组件，用于自动生成wangEditor编辑器内容的目录导航。
 
 ## 安装
 
 ```bash
-npm install wangeditor-dir-vue3
+npm install wangeditor-directory-vue3
 ```
 
 ## 使用方法
 
-### 组件中使用
+### 全局注册
+
+```js
+import { createApp } from 'vue'
+import App from './App.vue'
+import { WangeditorDirVue3 } from 'wangeditor-directory-vue3'
+import 'wangeditor-directory-vue3/dist/style.css'
+
+const app = createApp(App)
+app.use(WangeditorDirVue3)
+app.mount('#app')
+```
+
+### 局部注册
 
 ```vue
 <template>
-  <div>
-    <WangeEditorDirVue3 
-      :rootSelector="editorRef" 
-      :containerStyle="containerStyle"
-      :activeStyle="activeStyle"
+  <div class="editor-container">
+    <div id="editor-content"></div>
+    <WangeditorDirVue3 
+      :rootSelector="editorRoot"
+      :indentSize="15"
+      @close="handleClose"
     />
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted } from 'vue'
-//本人水平有限 暂未解决引入问题
-'import WangeEditorDir from 'wangeditor-dir-vue3/src/wange-editor_dir_vue3.vue' '
+import { WangeditorDirVue3 } from 'wangeditor-directory-vue3'
+import 'wangeditor-directory-vue3/dist/style.css'
+import { createEditor } from '@wangeditor/editor'
 
-export default {
-  components: {
-    WangeEditorDirVue3
-  },
-  setup() {
-    const editorRef = ref(null)
-    const containerStyle = {
-      width: '300px',
-      height: '400px',
-      border: '1px solid #ccc'
-    }
-    const activeStyle = {
-      color: 'red',
-      fontWeight: 'bold'
-    }
+const editorRoot = ref(null)
 
-    onMounted(() => {
-      // 获取 wangEditor 根元素
-      editorRef.value = document.querySelector('.w-e-editor')
-    })
-
-    return {
-      editorRef,
-      containerStyle,
-      activeStyle
+onMounted(() => {
+  // 创建编辑器
+  const editor = createEditor({
+    selector: '#editor-content',
+    html: '<h1>标题1</h1><p>内容...</p><h2>标题2</h2><p>更多内容...</p>',
+    config: {
+      // 编辑器配置
     }
-  }
+  })
+  
+  // 获取编辑器根元素
+  editorRoot.value = document.querySelector('#editor-content')
+})
+
+const handleClose = () => {
+  // 处理目录关闭事件
+  console.log('目录已关闭')
 }
 </script>
 ```
 
+## 属性
 
-## 组件属性
-
-| 属性名 | 类型 | 描述 |
-| --- | --- | --- |
-| rootSelector | HTMLElement | wangEditor 编辑器内容区域根元素（必需） |
-| indentSize | Number | 目录缩进间隔（默认：15px） |
-| containerStyle | Object | 容器样式 |
-| itemStyle | Object | 目录项样式 |
-| headerStyle | Object | 头部样式 |
-| activeStyle | Object | 激活状态样式 |
+| 属性名 | 类型 | 默认值 | 描述 |
+| ------ | ---- | ------ | ---- |
+| rootSelector | HTMLElement | - | wangEditor的根元素，必传 |
+| indentSize | Number | 15 | 目录层级缩进大小 |
+| containerStyle | Object | {} | 容器样式 |
+| itemStyle | Object | {} | 目录项样式 |
+| headerStyle | Object | {} | 目录头部样式 |
+| activeStyle | Object | {} | 激活项样式 |
 
 ## 事件
 
 | 事件名 | 描述 |
-| --- | --- |
-| close | 关闭目录时触发 |
+| ------ | ---- |
+| close | 目录关闭时触发 |
 
 ## 插槽
 
 | 插槽名 | 描述 |
-| --- | --- |
-| header | 自定义头部内容 |
-| empty | 无数据时显示的内容 |
+| ------ | ---- |
+| header | 自定义目录头部 |
+| empty | 没有目录项时的提示 |
 
+## 方法
 
+通过ref可以调用组件内部方法：
 
+```vue
+<template>
+  <WangeditorDirVue3 ref="directoryRef" :rootSelector="editorRoot" />
+  <button @click="refreshDirectory">刷新目录</button>
+</template>
 
-## 效果图
-![](./image.png)
+<script setup>
+import { ref } from 'vue'
+
+const directoryRef = ref(null)
+
+const refreshDirectory = () => {
+  directoryRef.value.init()
+}
+</script>
+```
+
+## 示例
+
+目录组件会自动识别编辑器内的h1, h2, h3标签并生成对应的目录项，点击目录项可以快速定位到对应的标题位置。
+
+## 许可证
+
+MIT

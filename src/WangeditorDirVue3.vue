@@ -17,7 +17,7 @@
       <!-- 目录内容 -->
       <ul>
         <li v-for="(item, index) in tableOfContents" :key="item.id" class="li-item"
-          :style="{ paddingLeft: item.level * (indentSize as unknown as number || 20) + 'px', ...itemStyle }">
+          :style="{ paddingLeft: item.level * (indentSize || 20) + 'px', ...itemStyle }">
           <span :style="activeIndex === index ? activeStyle : {}" @click="handleItemClick(index)">{{ item.text }}</span>
         </li>
       </ul>
@@ -29,30 +29,54 @@
     </div>
   </div>
 </template>
+<script lang="ts">
+import { defineComponent } from 'vue'
+
+export default defineComponent({
+  name: 'WangeditorDirVue3'
+})
+</script>
+
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
-const emit = defineEmits(['close'])
-const props = defineProps<{
-  rootSelector: HTMLElement // wangEditor根元素
-  indentSize?: {
-    type: number
-    default: 15
-  }  //目录缩进间隔
-  containerStyle?: {
-    [key: string]: string
-  }
-  itemStyle?: {
-    [key: string]: string
-  }
-  headerStyle?: {
-    [key: string]: string
-  }
-  activeStyle?: {
-    [key: string]: string
-  }
-}>()
 
-let tableOfContents: any = ref([])
+interface TocItem {
+  id: string;
+  text: string | null;
+  level: number;
+  index: number;
+}
+
+const emit = defineEmits(['close'])
+const props = defineProps({
+  rootSelector: {
+    type: Object as () => HTMLElement,
+    required: true
+  },
+  indentSize: {
+    type: Number,
+    default: 15
+  },
+  containerStyle: {
+    type: Object as () => Record<string, string>,
+    default: () => ({})
+  },
+  itemStyle: {
+    type: Object as () => Record<string, string>,
+    default: () => ({})
+  },
+  headerStyle: {
+    type: Object as () => Record<string, string>,
+    default: () => ({})
+  },
+  activeStyle: {
+    type: Object as () => Record<string, string>,
+    default: () => ({})
+  }
+})
+
+let tableOfContents = ref<TocItem[]>([])
+
 // 防抖函数
 const debounce = (fn: Function, delay: number) => {
   let timer: number | null = null
@@ -69,17 +93,23 @@ const levelMap = {
   'H2': 1,
   'H3': 2
 }
+
 // 生成目录
 const generateTableOfContents = () => {
   const rootSelector = props.rootSelector
   if (rootSelector) {
     const headings = rootSelector.querySelectorAll('h1, h2, h3')
-    const toc: any = []
+    const toc: TocItem[] = []
     headings.forEach((heading, index) => {
       const id = `section-${index + 1}`
       const level = levelMap[heading.tagName as keyof typeof levelMap]
       heading.setAttribute('id', id) // 设置标题的id属性
-      toc.push({ id: id, text: heading.textContent, level: level, index: index }) // 将标题文本、id和等级添加到目录项中
+      toc.push({ 
+        id: id, 
+        text: heading.textContent, 
+        level: level, 
+        index: index 
+      }) // 将标题文本、id和等级添加到目录项中
     })
     return toc
   } else {
@@ -94,7 +124,6 @@ const handleItemClick = (index: number) => {
   // 获取目标目录项的锚点链接 href 属性值
   const sectionId = `section-${index + 1}`
   const targetItem = document.getElementById(sectionId) as HTMLElement
-  console.log(targetItem)
   // 滚动目录以确保当前点击的目录项可见
   if (targetItem && props.rootSelector) {
     const scrollContainer = props.rootSelector.querySelector('.w-e-scroll') as HTMLElement
@@ -105,7 +134,7 @@ const handleItemClick = (index: number) => {
   }
 }
 
-const activeIndex = ref()
+const activeIndex = ref<number | undefined>()
 
 // 判断元素是否在容器可视区域内
 const isElementInView = (element: HTMLElement, container: HTMLElement) => {
@@ -202,19 +231,19 @@ const addAnchorLinks = () => {
   })
 }
 
-const containerRef = ref()
-const headerRef = ref()
+const containerRef = ref<HTMLElement | null>(null)
+const headerRef = ref<HTMLElement | null>(null)
 const containerHeight = ref(0)
 const headerHeight = ref(0)
 const initHeight = () => {
-  containerHeight.value = containerRef.value.clientHeight
-  headerHeight.value = headerRef.value.clientHeight
-  console.log(containerHeight.value, headerHeight.value)
+  if (containerRef.value && headerRef.value) {
+    containerHeight.value = containerRef.value.clientHeight
+    headerHeight.value = headerRef.value.clientHeight
+  }
 }
 
 const init = () => {
   tableOfContents.value = generateTableOfContents()
-  console.log(tableOfContents.value)
   handleScroll(0)
   addAnchorLinks()
 
@@ -240,78 +269,84 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  props.rootSelector && props.rootSelector.removeEventListener('wheel', hanldleRootScroll)
+  if (props.rootSelector) {
+    const scrollContainer = props.rootSelector.querySelector('.w-e-scroll');
+    scrollContainer && scrollContainer.removeEventListener('wheel', hanldleRootScroll)
+  }
 })
 
 defineExpose({ init })
 </script>
-<style scoped lang="css">
+
+<style scoped>
 .directory-container {
+  position: relative;
+  width: 300px;
   height: 100%;
-  width: 100%;
-  background-color: #fff;
-  border: 1px solid #000;
-  border-radius: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  z-index: 9;
 }
 
 .header {
   height: 40px;
+  background: #f1f1f1;
+  padding: 0 10px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.title {
-  width: 100%;
-  text-align: center;
-  font-size: 16px;
-  font-weight: bold;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  justify-content: space-between;
+  border-bottom: 1px solid #ddd;
 }
 
 .close-button {
   cursor: pointer;
-  font-size: 13px;
-  font-weight: bold;
-  margin-left: 10px;
-  color: gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
 .table-of-contents {
-  overflow-y: scroll;
-  padding: 5px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
 }
 
-.table-of-contents a {
-  color: inherit;
-}
-
-.table-of-contents li {
-  margin: 3px 0;
-}
-
-
-.table-of-contents .active {
-  font-weight: bold;
-  ;
+.table-of-contents ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .li-item {
-  cursor: pointer;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.li-item:hover {
-  text-shadow: 0 0 2px gray;
+.li-item span {
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 2px 4px;
+  transition: all 0.3s;
+}
+
+.li-item span:hover {
+  background: #f0f0f0;
+}
+
+.li-item span.active {
+  color: #1890ff;
+  font-weight: bold;
 }
 
 .empty-container {
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: gray;
+  padding: 20px;
+  text-align: center;
+  color: #999;
 }
 </style>
