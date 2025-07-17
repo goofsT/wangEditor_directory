@@ -1,26 +1,26 @@
 {
   "name": "wangeditor-dir-vue3",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.2.0",
+  "description": "目录组件，用于 wangEditor",
   "author": "tianbin",
-  "main": "dist/wange-editor_dir_vue3.ssr.js",
-  "browser": "dist/wange-editor_dir_vue3.esm.js",
   "module": "dist/wange-editor_dir_vue3.esm.js",
-  "unpkg": "dist/wange-editor_dir_vue3.min.js",
-  "types": "dist/types/src/entry.esm.d.ts",
+  "main": "dist/wange-editor_dir_vue3.esm.js",
+  "types": "dist/types/entry.esm.d.ts",
   "files": [
     "dist/*",
     "src/**/*.vue"
   ],
+  "keywords": [
+    "wangEditor",
+    "directory",
+    "vue3",
+    "component"
+  ],
   "sideEffects": false,
   "scripts": {
     "serve": "vue-cli-service serve dev/serve.ts",
-    "prebuild": "rimraf ./dist",
-    "build": "cross-env NODE_ENV=production rollup --config build/rollup.config.js",
-    "build:ssr": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format cjs",
-    "build:es": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format es",
-    "build:unpkg": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format iife",
-    "postbuild": "rimraf ./dist/types/dev ./dist/types/src/entry.d.ts"
+    "build": "rimraf ./dist && cross-env NODE_ENV=production rollup --config build/rollup.config.js",
+    "build:es": "cross-env NODE_ENV=production rollup --config build/rollup.config.js"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
