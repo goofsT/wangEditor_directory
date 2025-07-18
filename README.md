@@ -1,11 +1,11 @@
-# wangeditor-directory-vue3
+# wangeditor5-dir-vue3
 
 一个基于Vue 3的wangEditor目录组件，用于自动生成wangEditor编辑器内容的目录导航。
 
 ## 安装
 
 ```bash
-npm install wangeditor-directory-vue3
+npm install wangeditor5-dir-vue3
 ```
 
 ## 使用方法

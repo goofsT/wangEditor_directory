@@ -1,6 +1,6 @@
 {
-  "name": "wangeditor-dir-vue3",
-  "version": "0.0.1",
+  "name": "wangeditor5-dir-vue3",
+  "version": "0.0.3",
   "description": "一个基于vue3的wangeditor目录组件",
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
