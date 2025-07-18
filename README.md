@@ -15,8 +15,8 @@ npm install wangeditor5-dir-vue3
 ```js
 import { createApp } from 'vue'
 import App from './App.vue'
-import { WangeditorDirVue3 } from 'wangeditor-directory-vue3'
-import 'wangeditor-directory-vue3/dist/style.css'
+import { WangeditorDirVue3 } from 'wangeditor5-dir-vue3'
+import 'wangeditor5-dir-vue3/dist/style.css'
 
 const app = createApp(App)
 app.use(WangeditorDirVue3)
@@ -39,8 +39,8 @@ app.mount('#app')
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { WangeditorDirVue3 } from 'wangeditor-directory-vue3'
-import 'wangeditor-directory-vue3/dist/style.css'
+import { WangeditorDirVue3 } from 'wangeditor5-dir-vue3'
+import 'wangeditor5-dir-vue3/dist/style.css'
 import { createEditor } from '@wangeditor/editor'
 
 const editorRoot = ref(null)
